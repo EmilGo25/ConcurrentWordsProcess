@@ -6,22 +6,20 @@ const app = express()
 const port = 3000
 const cpus = os.cpus
 const numCPUs = cpus().length
+const forkedWorkers = []
+const workerResponds = []
 
 const inMemoryStoredWords = {}
-
-const processStats = ({ statsObject }) => {
-  return {}
-}
 
 // use multi-processing
 if (cluster.isPrimary) {
   console.log(`Primary ${process.pid} is running`)
   for (let i = 0; i < numCPUs; i++) {
     const worker = cluster.fork()
-
     worker.on('message', (wordsObject) => {
-      processStats({ statsObject: wordsObject })
+      workerResponds.push(wordsObject)
     })
+    forkedWorkers.push(worker)
   }
 
   cluster.on('exit', (worker, code, signal) => {
@@ -33,8 +31,15 @@ if (cluster.isPrimary) {
     res.send('Words were integrated')
   })
 
-  app.post('/stats', (req, res) => {
-    const stats = {}
+  app.post('/stats', async (req, res) => {
+    const statsCollection = await new Promise((resolve, reject) => {
+      forkedWorkers.forEach((workerObj) => {
+        workerObj.send('SEND_STATS')
+      })
+
+      while (workerResponds.length < forkedWorkers.length) {}
+      resolve([...workerResponds])
+    })
 
     res.send(stats)
   })
