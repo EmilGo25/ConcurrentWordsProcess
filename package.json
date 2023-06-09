@@ -5,7 +5,16 @@
   "name": "concurrentwordsprocess",
   "version": "1.0.0",
   "main": "index.js",
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^7.29.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-react-app": "^6.0.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-pure": "github:purely-functional/eslint-plugin-pure",
+    "eslint-plugin-react": "^7.32.2",
+    "prettier": "^2.3.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
