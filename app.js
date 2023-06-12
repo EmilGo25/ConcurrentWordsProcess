@@ -8,7 +8,8 @@ const frequenciesTree = new AVLTree()
 
 const addNewWordToNode = ({ nodeKey, word }) => {
   const treeNode = frequenciesTree.find(nodeKey)
-  const newWordsArray = treeNode.data.push(word)
+  const newWordsArray = treeNode.data
+  newWordsArray.push(word)
   frequenciesTree.remove(nodeKey)
   frequenciesTree.insert(nodeKey, newWordsArray)
 }
@@ -37,8 +38,8 @@ const processWordWhichIsNotInHistogram = (word) => {
 }
 
 const processWordWhichIsInHistogram = (word) => {
-  const newWordOccurences = inMemoryStoredWords[word] + 1
-  inMemoryStoredWords[word] = inMemoryStoredWords
+  const newWordOccurences = Number(inMemoryStoredWords[word]) + 1
+  inMemoryStoredWords[word] = newWordOccurences
   // remove word from frequency store
   removeWordFromNode({ nodeKey: newWordOccurences - 1, word })
 
@@ -70,15 +71,45 @@ const processWords = () => {
       processWordWhichIsInHistogram(word)
     }
   })
-  console.log('inMemoryStoredWords', inMemoryStoredWords)
+}
+
+const getTopOccurences = (topNumOfElements) => {
+  const topOccurences = {}
+  let currentNode = frequenciesTree.maxNode()
+  let elementsCounter = 0
+  while (elementsCounter < topNumOfElements && currentNode) {
+    let nodeWordsCounter = 0
+    const currentNodeWords = [...currentNode.data]
+    while (
+      elementsCounter < topNumOfElements &&
+      nodeWordsCounter < currentNodeWords.length
+    ) {
+      const wordToInsert = currentNodeWords.pop()
+      topOccurences[wordToInsert] = Number(inMemoryStoredWords[wordToInsert])
+      elementsCounter++
+      nodeWordsCounter++
+    }
+    currentNode = frequenciesTree.prev(currentNode)
+  }
+
+  return topOccurences
+}
+const getStats = () => {
+  const statsOutput = {}
+  const frequencies = frequenciesTree.keys()
+  statsOutput.least = frequencies[0]
+  statsOutput.median = frequencies[Math.floor(frequencies.length / 2)]
+  const topOccurences = getTopOccurences(5)
+  statsOutput.top5 = topOccurences
+  return statsOutput
 }
 
 setInterval(processWords, 1000)
 
 app.use(express.json())
 app.get('/statistics', async (req, res) => {
-  const incomingWords = req.body?.words.split(',')
-  res.send('Hello World!')
+  const statistics = getStats()
+  res.status(200).send(statistics)
 })
 app.post('/words', (req, res) => {
   const wordsInput = req.body?.words
