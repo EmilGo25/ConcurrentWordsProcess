@@ -38,21 +38,21 @@ const processWordWhichIsNotInHistogram = (word) => {
 }
 
 const processWordWhichIsInHistogram = (word) => {
-  const newWordOccurences = Number(inMemoryStoredWords[word]) + 1
-  inMemoryStoredWords[word] = newWordOccurences
+  const newWordOccurrences = Number(inMemoryStoredWords[word]) + 1
+  inMemoryStoredWords[word] = newWordOccurrences
   // remove word from frequency store
-  removeWordFromNode({ nodeKey: newWordOccurences - 1, word })
+  removeWordFromNode({ nodeKey: newWordOccurrences - 1, word })
 
   // add new frequency with the word
-  if (!frequenciesTree.contains(newWordOccurences)) {
-    frequenciesTree.insert(newWordOccurences, [word])
+  if (!frequenciesTree.contains(newWordOccurrences)) {
+    frequenciesTree.insert(newWordOccurrences, [word])
   }
   // update the frequency with the new word
   else {
-    addNewWordToNode({ nodeKey: newWordOccurences, word })
+    addNewWordToNode({ nodeKey: newWordOccurrences, word })
   }
 }
-const processWords = () => {
+export const processWords = () => {
   if (wordsQueue.length === 0) {
     return
   }
@@ -73,8 +73,8 @@ const processWords = () => {
   })
 }
 
-const getTopOccurences = (topNumOfElements) => {
-  const topOccurences = {}
+const getTopOccurrences = (topNumOfElements) => {
+  const topOccurrences = {}
   let currentNode = frequenciesTree.maxNode()
   let elementsCounter = 0
   while (elementsCounter < topNumOfElements && currentNode) {
@@ -85,22 +85,22 @@ const getTopOccurences = (topNumOfElements) => {
       nodeWordsCounter < currentNodeWords.length
     ) {
       const wordToInsert = currentNodeWords.pop()
-      topOccurences[wordToInsert] = Number(inMemoryStoredWords[wordToInsert])
+      topOccurrences[wordToInsert] = Number(inMemoryStoredWords[wordToInsert])
       elementsCounter++
       nodeWordsCounter++
     }
     currentNode = frequenciesTree.prev(currentNode)
   }
 
-  return topOccurences
+  return topOccurrences
 }
-const getStats = () => {
+export const getStats = () => {
   const statsOutput = {}
   const frequencies = frequenciesTree.keys()
   statsOutput.least = frequencies[0]
   statsOutput.median = frequencies[Math.floor(frequencies.length / 2)]
-  const topOccurences = getTopOccurences(5)
-  statsOutput.top5 = topOccurences
+  const topOccurrences = getTopOccurrences(5)
+  statsOutput.top5 = topOccurrences
   return statsOutput
 }
 
