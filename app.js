@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors')
 const app = express()
 const AVLTree = require('avl')
 const port = 3000
@@ -52,7 +53,7 @@ const processWordWhichIsInHistogram = (word) => {
     addNewWordToNode({ nodeKey: newWordOccurrences, word })
   }
 }
-export const processWords = () => {
+const processWords = () => {
   if (wordsQueue.length === 0) {
     return
   }
@@ -82,7 +83,7 @@ const getTopOccurrences = (topNumOfElements) => {
     const currentNodeWords = [...currentNode.data]
     while (
       elementsCounter < topNumOfElements &&
-      nodeWordsCounter < currentNodeWords.length
+      nodeWordsCounter < currentNode.data.length
     ) {
       const wordToInsert = currentNodeWords.pop()
       topOccurrences[wordToInsert] = Number(inMemoryStoredWords[wordToInsert])
@@ -94,9 +95,15 @@ const getTopOccurrences = (topNumOfElements) => {
 
   return topOccurrences
 }
-export const getStats = () => {
+const getStats = () => {
   const statsOutput = {}
   const frequencies = frequenciesTree.keys()
+  if (frequencies.length === 0) {
+    statsOutput.least = 0
+    statsOutput.median = 0
+    statsOutput.top5 = {}
+    return statsOutput
+  }
   statsOutput.least = frequencies[0]
   statsOutput.median = frequencies[Math.floor(frequencies.length / 2)]
   const topOccurrences = getTopOccurrences(5)
@@ -104,9 +111,14 @@ export const getStats = () => {
   return statsOutput
 }
 
-setInterval(processWords, 1000)
+setInterval(processWords, 0)
 
 app.use(express.json())
+app.use(
+  cors({
+    origin: '*',
+  })
+)
 app.get('/statistics', async (req, res) => {
   const statistics = getStats()
   res.status(200).send(statistics)
